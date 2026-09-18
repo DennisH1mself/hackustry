@@ -1,95 +1,62 @@
-importPackage(java.lang);
+function restoreWall(build){
+    build.dead = false;
+    build.health = build.maxHealth;
+}
 
+// Damage is ignored, but removal is intentionally not overridden. Mindustry's
+// instantDeconstruct flag handles player removal without breaking world cleanup.
 const wallbuild = {
-    updateTile(){
-        this.super$updateTile();
-        this.health = this.maxHealth;
+    handleDamage(){
+        return 0;
     },
-    
-    collision: () => true,
-    
-    no(){
-        this.dead = false;
-        this.health = this.maxHealth;
-    },
+
     kill(){
-        this.no();
+        restoreWall(this);
     },
+
     killed(){
-        this.no();
-    },
-    remove(){
-        this.no();
-    },
-    damage(){
-        this.no();
+        restoreWall(this);
     }
 };
 
-let wall, largewall;
-
-Events.on(ContentInitEvent, () => {
-    wall = extend(Wall, "hackusated-wall", {
-        localizedName: "Hackusated Wall",
-        category: Category.defense,
-        buildVisibility: BuildVisibility.hidden,
-        inEditor: false,
-        size: 1,
-        
-        health: Integer.MAX_VALUE
-    });
-    wall.buildType = () => extend(Wall.WallBuild, wall, wallbuild);
-
-    largewall = extend(Wall, "hackusated-wall-large", {
-        localizedName: "Large Hackusated Wall",
-        category: Category.defense,
-        buildVisibility: BuildVisibility.hidden,
-        inEditor: false,
-        size: 2,
-        
-        health: Integer.MAX_VALUE
-    });
-    largewall.buildType = () => extend(Wall.WallBuild, largewall, wallbuild);
-    
-    wall.init();
-    largewall.init();
-});
-
-/*
-const mender = extend(MendProjector, "hackusated-mender", {
-    localizedName: "Hackusated Mender",
-    category: Category.effect,
+const wall = extend(Wall, "hackusated-wall", {
+    localizedName: "Hackusated Wall",
+    description: "An indestructible wall that builds and deconstructs instantly.",
+    category: Category.defense,
+    requirements: ItemStack.empty,
     buildVisibility: BuildVisibility.hidden,
     inEditor: false,
-    size: 2    
+    size: 1,
+    health: Integer.MAX_VALUE,
+    instantBuild: true,
+    instantDeconstruct: true,
+    alwaysUnlocked: true
 });
+wall.buildType = () => extend(Wall.WallBuild, wall, wallbuild);
 
-const od = extend(OverdriveProjector, "hackusated-overdrive", {
-    localizedName: "Hackusated Overdrive",
-    category: Category.effect,
+const largewall = extend(Wall, "hackusated-wall-large", {
+    localizedName: "Large Hackusated Wall",
+    description: "A large indestructible wall that builds and deconstructs instantly.",
+    category: Category.defense,
+    requirements: ItemStack.empty,
     buildVisibility: BuildVisibility.hidden,
     inEditor: false,
-    size: 2
+    size: 2,
+    health: Integer.MAX_VALUE,
+    instantBuild: true,
+    instantDeconstruct: true,
+    alwaysUnlocked: true
 });
-*/
+largewall.buildType = () => extend(Wall.WallBuild, largewall, wallbuild);
 
-module.exports = (add) => {
-    add("hackusated-walls", true, t => {
-        wall.inEditor = t;
-        wall.buildVisibility = t ? BuildVisibility.shown : BuildVisibility.hidden;
-        largewall.inEditor = t;
-        largewall.buildVisibility = t ? BuildVisibility.shown : BuildVisibility.hidden;
+function setVisible(block, visible){
+    block.inEditor = visible;
+    block.buildVisibility = visible ? BuildVisibility.shown : BuildVisibility.hidden;
+}
+
+module.exports = add => {
+    add("hackusated-walls", true, enabled => {
+        setVisible(wall, enabled);
+        setVisible(largewall, enabled);
     });
-    
-    /*
-    add("hackusated-mender", true, t => {
-        mender.inEditor = t;
-        mender.buildVisibility = t ? BuildVisibility.shown : BuildVisibility.hidden;
-    });
-    
-    add("hackusated-overdrive", true, t => {
-        od.inEditor = t;
-        od.buildVisibility = t ? BuildVisibility.shown : BuildVisibility.hidden;
-    });
-    */
 };

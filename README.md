@@ -5,8 +5,16 @@ First Mindustry cheat mod ever made.
 At this point this mod isn't really a cheat mod anymore. it has became a large testing and utility mod (with a messy codebase). you still can cheat using it, and cheating isn't always bad, and it was known as *the* cheat mod before which is the reason i'm labeling it "cheat mod" here. also i'll port this mod to [groovy](https://groovy-lang.org/) because ~~javascript will be getting limited again in mindustry 7.0.~~ i feel like it. (also js got unlimited again)
 
 ## Features
+### Mindustry v8 update
+- Supports Mindustry build 159+
+- Hackusated Conveyor with complete v8 animation/blending sprites
+- Instant high-throughput Hackusated Junction for crossed conveyor lines
+- Hackusated Walls remain indestructible during combat
+- Hackusated conveyors, junctions, and walls build and deconstruct instantly
+
 ### Finished
 - Hackusated Conveyors (ported from v1)
+- Instant Hackusated Junction
 - Hackusated Walls (ported from v2)
 - OP Turrets (from v3)
 - Removed reconstructor costs (from v3)

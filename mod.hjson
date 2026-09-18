@@ -2,8 +2,8 @@
     name: "hackustry",
     displayName: "Hackustry",
     author: "QmelZ",
-    description: "Hackustry v4",
-    version: 4,
-    minGameVersion: 126,
-    hidden: true
+    description: "Hackustry utilities and overpowered sandbox blocks for Mindustry v8.",
+    version: "4.1.4",
+    minGameVersion: 159,
+    hidden: false
 }

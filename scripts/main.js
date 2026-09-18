@@ -1,24 +1,22 @@
-/* 
-    welcome to the start of my spaghetti code
-    have fun trying to read it without dying
-*/
+// Load features on every platform so custom content IDs stay identical between
+// clients and servers. UI-only setup remains guarded below.
+require(modName + "/features/features");
 
-Vars.enableConsole = true;
-
-if(Vars.headless){
-    throw "no server support yet";
-}else{
-    if(Core.app.isDesktop()){
-        rpc();
-        title();
-    }
-    
+if(!Vars.headless){
     const menu = require(modName + "/menu");
     let dialog;
     Events.on(ClientLoadEvent, () => {
         dialog = menu.setupDialog();
         menu.addSettings(dialog);
     });
+
+    // Keep optional desktop extras isolated from the gameplay/settings UI.
+    if(Core.app.isDesktop()){
+        rpc();
+        try{
+            title();
+        }catch(c){}
+    }
 }
 
 // most pointless thing i have ever done
@@ -47,8 +45,8 @@ function title(){
         switch(getGameStatus()){
             case "In Menu": {
                 try{
-                    if(!Core.scene.dialog) return "Main Menu";
-                    let title = Core.scene.dialog.title.getText();
+                    if(!Core.scene.hasDialog()) return "Main Menu";
+                    let title = Core.scene.getDialog().title.getText();
                     return title === "" ? "Unknown" : title;
                 }catch(c){
                     return "File Chooser";
@@ -69,15 +67,15 @@ function title(){
                 return p.selected.planet.localizedName + " Sector " + p.selected.id;
             }
             case "In Editor": {
-                if(!Core.scene.dialog) return "Editing";
-                let title = Core.scene.dialog.title.getText();
+                if(!Core.scene.hasDialog()) return "Editing";
+                let title = Core.scene.getDialog().title.getText();
                 if(title === "") return "Editing";
                 return title;
             }
         }
     }
     
-    let modcount = Vars.mods.list().copy().filter(e => e.enabled()).size;
+    let modcount = Vars.mods.list().count(e => e.enabled());
     let statics = [
         "Mindustry v" + Version.buildString(),
         modcount + (modcount === 1 ? " Mod Enabled" : " Mods Enabled"),

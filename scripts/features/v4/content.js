@@ -1,4 +1,17 @@
-importPackage(Packages.arc.util.async);
+const buildVisibilities = {
+    hidden: BuildVisibility.hidden,
+    shown: BuildVisibility.shown,
+    debugOnly: BuildVisibility.debugOnly,
+    editorOnly: BuildVisibility.editorOnly,
+    coreZoneOnly: BuildVisibility.coreZoneOnly,
+    worldProcessorOnly: BuildVisibility.worldProcessorOnly,
+    sandboxOnly: BuildVisibility.sandboxOnly,
+    campaignOnly: BuildVisibility.campaignOnly,
+    legacyLaunchPadOnly: BuildVisibility.legacyLaunchPadOnly,
+    notLegacyLaunchPadOnly: BuildVisibility.notLegacyLaunchPadOnly,
+    lightingOnly: BuildVisibility.lightingOnly,
+    fogOnly: BuildVisibility.fogOnly
+};
 
 function content(){
     const dialog = new BaseDialog("content");
@@ -10,17 +23,19 @@ function content(){
         let i = 0;
         Vars.content.each(e => {
             if(!(e instanceof UnlockableContent)) return;
-            p.button(e.localizedName, new TextureRegionDrawable(e.icon(Cicon.medium)), () => {
+            p.button(e.localizedName, new TextureRegionDrawable(e.uiIcon), () => {
                 const content = new BaseDialog(e.name);
                 content.addCloseButton();
                 
                 let c = content.cont;
                 c.defaults().center();
-                c.image(e.icon(Cicon.full));
+                c.image(e.fullIcon);
                 c.row();
                 c.label(() => {
-                    let n = e.class.name.includes("$") ? e.class.superclass.name : e.class.name;
-                    return e.localizedName + " (type: " + n.substring(n.lastIndexOf(".") + 1, n.length) + ")";
+                    let cls = getRealClass(e);
+                    if(cls.getName().includes("$")) cls = cls.getSuperclass();
+                    let name = cls.getName();
+                    return e.localizedName + " (type: " + name.substring(name.lastIndexOf(".") + 1) + ")";
                 });
                 c.row();
                 c.button("unlock", Icon.lockOpen, () => {
@@ -44,10 +59,9 @@ function content(){
                         const bv = new BaseDialog("build visibility");
                         bv.addCloseButton();
                         
-                        Object.keys(BuildVisibility).forEach(b => {
-                            if(BuildVisibility[b] instanceof Function) return;
+                        Object.keys(buildVisibilities).forEach(b => {
                             bv.cont.button(b, () => {
-                                e.buildVisibility = BuildVisibility[b];
+                                e.buildVisibility = buildVisibilities[b];
                                 bv.hide();
                             }).size(210, 64);
                             bv.cont.row();
@@ -63,27 +77,33 @@ function content(){
                     stats.addCloseButton();
                     
                     stats.cont.center().pane(pane => {
-                        Threads.daemon(() => {
-                            let i2 = 0;
-                            Object.keys(e).forEach(s => {
-                                if(e[s] === undefined) return;
-                                if(typeof e[s] === "object") return;
-                                if(typeof e[s] === "function") return;
-                                
-                                pane.button(s, () => {
-                                    Vars.ui.showTextInput("enter value (" + typeof e[s] + ")", s + ":", 128, "", false, v => {
-                                        let value = v;
-                                        if(v.match(/^true$|^false$/)) value = eval(v);
-                                        try{
-                                            e[s] = value;
-                                        }catch(c){}
-                                    });
-                                    stats.hide();
-                                }).size(210, 64);
-                                i2++
-                                if(!(i2 % 2)) pane.row();
-                            });
-                        }).join();
+                        let i2 = 0;
+                        Object.keys(e).forEach(s => {
+                            if(e[s] === undefined) return;
+                            if(typeof e[s] === "object") return;
+                            if(typeof e[s] === "function") return;
+
+                            pane.button(s, () => {
+                                const valueType = typeof e[s];
+                                Vars.ui.showTextInput("enter value (" + valueType + ")", s + ":", 128, String(e[s]), false, v => {
+                                    let value = v;
+                                    if(valueType === "boolean"){
+                                        if(!v.match(/^true$|^false$/i)) return;
+                                        value = v.toLowerCase() === "true";
+                                    }else if(valueType === "number"){
+                                        value = Number(v);
+                                        if(!isFinite(value)) return;
+                                    }
+
+                                    try{
+                                        e[s] = value;
+                                    }catch(c){}
+                                });
+                                stats.hide();
+                            }).size(210, 64);
+                            i2++;
+                            if(!(i2 % 2)) pane.row();
+                        });
                     }).growY().width(Vars.mobile ? Core.graphics.getWidth() : Core.graphics.getWidth()/3);
                     
                     stats.show();
@@ -135,10 +155,9 @@ function content(){
             const bv = new BaseDialog("build visibility");
             bv.addCloseButton();
             
-            Object.keys(BuildVisibility).forEach(b => {
-                if(BuildVisibility[b] instanceof Function) return;
+            Object.keys(buildVisibilities).forEach(b => {
                 bv.cont.button(b, () => {
-                    Vars.content.blocks().each(e => e.buildVisibility = BuildVisibility[b]);
+                    Vars.content.blocks().each(e => e.buildVisibility = buildVisibilities[b]);
                     bv.hide();
                 }).size(210, 64);
                 bv.cont.row();

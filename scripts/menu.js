@@ -42,6 +42,7 @@ function setupDialog(){
         add("cursed-mode", "cursed mode");
         add("op-turrets", "op turrets");
         add("hackusated-conveyor", "hackusated conveyor");
+        add("hackusated-junction", "instant hackusated junction");
         add("hackusated-walls", "hackusated walls");
         add("launch-anywhere", "launch anywhere");
         
@@ -49,7 +50,7 @@ function setupDialog(){
     
     dialog.buttons.button("more", Icon.add, () => more()).size(210, 64);
     
-    if(Vars.mobile) dialog.buttons.button(Icon.terminal, () => Vars.ui.scriptfrag.toggle()).size(64);
+    if(Vars.mobile) dialog.buttons.button(Icon.terminal, () => Vars.ui.consolefrag.toggle()).size(64);
     
     return dialog;
 }
@@ -66,8 +67,7 @@ function more(){
             for(let f in flist){
                 if(features.get(f)) features.runf(f);
             }
-            Vars.ui.showInfo("The game will now close to disable all features");
-            Core.scene.dialog.hidden(() => Core.app.exit());
+            Vars.ui.showInfoOnHidden("The game will now close to disable all features", () => Core.app.exit());
         });
         p.row();
         
@@ -131,9 +131,15 @@ function data(isExport, unlocks){
         
         Vars.ui.loadfrag.hide();
         
-        writeFile("export config", "json", json);
+        FileChooser.save("json")
+            .title("Export Hackustry config")
+            .name("hackustry-config.json")
+            .submit(file => file.writeString(json));
     }else{
-        readFile("import config", "json", json => {
+        FileChooser.open("json")
+            .title("Import Hackustry config")
+            .submit(file => {
+            let json = file.readString();
             Vars.ui.loadfrag.show();
             
             let obj;
@@ -145,8 +151,9 @@ function data(isExport, unlocks){
                 return;
             }
             
-            let proto = (e) => Object.getPrototypeOf(e);
-            if(proto(obj.features) !== proto({}) || proto(obj.content) !== proto({})){
+            if(!obj || typeof obj !== "object" || Array.isArray(obj) ||
+                !obj.features || typeof obj.features !== "object" || Array.isArray(obj.features) ||
+                !obj.content || typeof obj.content !== "object" || Array.isArray(obj.content)){
                 Vars.ui.loadfrag.hide();
                 Vars.ui.showErrorMessage("not a valid hackustry config");
                 return;
@@ -168,7 +175,7 @@ function data(isExport, unlocks){
             }
             
             Vars.ui.loadfrag.hide();
-            toast(Icon.check, "import successful");
+            toast(Icon.ok, "import successful");
         });
     }
 }
@@ -225,12 +232,11 @@ function accounts(){
 }
 
 function addSettings(dialog){
-    Vars.ui.settings.shown(() => {
-        Vars.ui.settings.children.get(1).children.get(0).children.get(0).row();
-        Vars.ui.settings.children.get(1).children.get(0).children.get(0).button("Hackustry", Styles.cleart, () => {
-            dialog.show();
+    Vars.ui.settings.addCategory("Hackustry", Icon.settings, table => {
+        table.button("Open Hackustry", Icon.settings, () => {
             Vars.ui.settings.hide();
-        });
+            dialog.show();
+        }).growX().height(64).pad(6);
     });
 }
 

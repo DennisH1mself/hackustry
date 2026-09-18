@@ -9,12 +9,12 @@ const util = {
         return features;
     },
     get(name){
-        if(!name || typeof name !== "string") return;
+        if(!name || typeof name !== "string" || !features[name]) return false;
         
         return Core.settings.getBool(name);
     },
     runf(name){
-        if(!name || typeof name !== "string") return;
+        if(!name || typeof name !== "string" || !features[name]) return false;
         
         let enabled = !Core.settings.getBool(name);
         Core.settings.put(name, enabled);
@@ -25,12 +25,12 @@ const util = {
                 if(Vars.headless){
                     Log.warn("[red]this feature needs a game restart to be disabled[]");
                 }else{
-                    Core.scene.dialog.hidden(() => {
-                        toast(Icon.warning, "[red]some features need a game restart to be disabled[]");
-                    });
+                    toast(Icon.warning, "[red]some features need a game restart to be disabled[]");
                 }
             }
         }
+
+        return enabled;
     }
 };
 module.exports = util;
@@ -55,11 +55,24 @@ load("v2");
 load("v3");
 load("v4");
 
+// The three primary content features are available on a fresh install without
+// requiring the settings dialog first. Existing user choices still win.
+Core.settings.defaults(
+    "hackusated-conveyor", true,
+    "hackusated-junction", true,
+    "hackusated-walls", true
+);
 
 // if the feature is on it should stay on
-Events.on(ClientLoadEvent, () => {
-    let runt = (f) => features[f].func(true);
+let applied = false;
+function applyEnabledFeatures(){
+    if(applied) return;
+    applied = true;
+
     for(let f in features){
-        if(util.get(f)) runt(f);
+        if(util.get(f)) features[f].func(true);
     }
-});
+}
+
+Events.on(ClientLoadEvent, applyEnabledFeatures);
+Events.on(ServerLoadEvent, applyEnabledFeatures);

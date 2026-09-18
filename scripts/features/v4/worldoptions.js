@@ -10,8 +10,8 @@ function worldoptions(){
             if(!option || typeof option !== "string") return;
             if(typeof Vars.state.rules[option] !== "boolean") return;
             
-            p.check(name, Vars.state.rules[option], () => {
-                Vars.state.rules[option] = !Vars.state.rules[option];
+            p.check(name, Vars.state.rules[option], value => {
+                Vars.state.rules[option] = value;
             }).left();
             p.row();
         }
@@ -25,10 +25,8 @@ function worldoptions(){
         check("reactor explosions", "reactorExplosions");
         check("schematics", "schematicsAllowed");
         check("fire", "fire");
-        check("units require ammo", "unitAmmo");
         check("unit building with logic", "logicUnitBuild");
         check("lighting", "lighting");
-        check("enemy lights", "enemyLights");
         check("core incinerates", "coreIncinerates");
         
         p.table(cons(t => {
@@ -53,7 +51,7 @@ module.exports = (p) => {
         worldoptions();
     }).self(s => {
         s.get().setDisabled(() => {
-            if(Vars.state.is(GameState.State.menu)) return true;
+            if(Vars.state.isMenu()) return true;
             if(Vars.net.client()) return true;
             return false;
         });

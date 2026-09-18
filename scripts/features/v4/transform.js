@@ -2,6 +2,7 @@ function become(u){
     if(!(u instanceof UnitType)) return;
     
     let c = Vars.player.unit();
+    if(c == null) return;
     Vars.player.unit(u.spawn(c.team, c.x, c.y));
     c.remove();
 }
@@ -17,7 +18,7 @@ function transform(){
         Vars.content.units().each(e => {
             if(e === UnitTypes.block) return;
             
-            p.button(e.localizedName, new TextureRegionDrawable(e.icon(Cicon.medium)), () => {
+            p.button(e.localizedName, new TextureRegionDrawable(e.uiIcon), () => {
                 become(e);
                 dialog.hide();
             });
@@ -35,7 +36,7 @@ module.exports = (p) => {
         transform();
     }).self(s => {
         s.get().setDisabled(() => {
-            if(Vars.state.is(GameState.State.menu)) return true;
+            if(Vars.state.isMenu()) return true;
             if(Vars.net.active()) return true;
             return false;
         });
