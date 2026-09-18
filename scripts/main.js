@@ -2,6 +2,10 @@
 // clients and servers. UI-only setup remains guarded below.
 require(modName + "/features/features");
 
+// Water Extractor output is measured per tick; 0.25 * 60 = 15 water/second.
+// Apply during mod load so both gameplay and the displayed block stats agree.
+Blocks.waterExtractor.pumpAmount = 0.25;
+
 if(!Vars.headless){
     const menu = require(modName + "/menu");
     let dialog;

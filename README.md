@@ -11,6 +11,7 @@ At this point this mod isn't really a cheat mod anymore. it has became a large t
 - Instant high-throughput Hackusated Junction for crossed conveyor lines
 - Hackusated Walls remain indestructible during combat
 - Hackusated conveyors, junctions, and walls build and deconstruct instantly
+- Vanilla Water Extractors produce 15 water/second at full efficiency
 
 ### Finished
 - Hackusated Conveyors (ported from v1)

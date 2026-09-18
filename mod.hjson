@@ -3,7 +3,7 @@
     displayName: "Hackustry",
     author: "QmelZ",
     description: "Hackustry utilities and overpowered sandbox blocks for Mindustry v8.",
-    version: "4.1.4",
+    version: "4.1.5",
     minGameVersion: 159,
     hidden: false
 }
